@@ -30,11 +30,11 @@ jobs:
       - name: Build & Push Frontend
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.FRONTEND_REPO }}/frontend"
-          docker build -t $IMAGE:latest ./frontend
+          docker build -t $IMAGE:latest ./frontend-repo
           docker push $IMAGE:latest
 
       - name: Build & Push Backend
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.BACKEND_REPO }}/backend"
-          docker build -t $IMAGE:latest ./backend
+          docker build -t $IMAGE:latest ./backend-repo
           docker push $IMAGE:latest
