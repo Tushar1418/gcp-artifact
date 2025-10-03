@@ -1,0 +1,40 @@
+name: Build & Push to Google Artifact Registry
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGION: ${{ secrets.GAR_REGION }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  FRONTEND_REPO: frontend-repo
+  BACKEND_REPO: backend-repo
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_KEY }}
+          export_default_credentials: true
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build & Push Frontend
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.FRONTEND_REPO }}/frontend"
+          docker build -t $IMAGE:latest ./frontend
+          docker push $IMAGE:latest
+
+      - name: Build & Push Backend
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.BACKEND_REPO }}/backend"
+          docker build -t $IMAGE:latest ./backend
+          docker push $IMAGE:latest
