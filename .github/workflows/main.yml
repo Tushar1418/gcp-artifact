@@ -1,0 +1,33 @@
+name: Build and Push Docker Images to GCP Artifact Registry
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev
+
+      - name: Build Frontend Docker Image
+        run: |
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/frontend-repo/frontend:latest ./frontend
+          docker push ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/frontend-repo/frontend:latest
+
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend-repo/backend:latest ./backend
+          docker push ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend-repo/backend:latest
