@@ -5,29 +5,38 @@ on:
     branches:
       - main
 
+env:
+  GCP_REGION: asia-south1                   # Replace with your Artifact Registry region
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Google Cloud SDK
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      # Step 3: Configure Docker to authenticate with Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
 
-      - name: Build Frontend Docker Image
+      # Step 4: Build and push frontend Docker image
+      - name: Build and push frontend Docker image
         run: |
-          docker build -t ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/frontend-repo/frontend:latest ./frontend
-          docker push ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/frontend-repo/frontend:latest
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/frontend-repo/frontend:latest ./frontend
+          docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/frontend-repo/frontend:latest
 
-      - name: Build Backend Docker Image
+      # Step 5: Build and push backend Docker image
+      - name: Build and push backend Docker image
         run: |
-          docker build -t ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend-repo/backend:latest ./backend
-          docker push ${GCP_REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend-repo/backend:latest
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo/backend:latest ./backend
+          docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo/backend:latest
