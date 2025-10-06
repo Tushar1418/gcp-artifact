@@ -20,7 +20,7 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev
+        run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quite
 
       - name: Build Frontend Docker Image
         run: |
