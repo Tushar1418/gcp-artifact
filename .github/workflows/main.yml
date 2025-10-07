@@ -25,11 +25,15 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 3: Check connectivity to GCP
+      # Step 3: Authenticate service account and check connectivity
       - name: Test GCP connection
         run: |
+          echo "Activating service account..."
+          gcloud auth activate-service-account --key-file=${{ secrets.GCP_SA_KEY }}
+          
           echo "Listing projects to test GCP connectivity..."
           gcloud projects list
+          
           echo "Listing Artifact Registry repositories..."
           gcloud artifacts repositories list --location=${GCP_REGION}
 
@@ -40,11 +44,17 @@ jobs:
       # Step 5: Build and push frontend Docker image
       - name: Build and push frontend Docker image
         run: |
-          docker build -t asia-south1-docker.pkg.dev/lunar-nuance-472604-c6/frontend-repo/frontend:latest ./frontend
-          docker push asia-south1-docker.pkg.dev/lunar-nuance-472604-c6/frontend-repo/frontend:latest
+          echo "Building frontend Docker image..."
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/frontend-repo/frontend:latest ./frontend
+          
+          echo "Pushing frontend Docker image..."
+          docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/frontend-repo/frontend:latest
 
       # Step 6: Build and push backend Docker image
       - name: Build and push backend Docker image
         run: |
+          echo "Building backend Docker image..."
           docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo/backend:latest ./backend
+          
+          echo "Pushing backend Docker image..."
           docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo/backend:latest
