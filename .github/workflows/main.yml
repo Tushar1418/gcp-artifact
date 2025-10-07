@@ -1,4 +1,4 @@
-]name: Build and Push Docker Images to GCP Artifact Registry
+name: Build and Push Docker Images to GCP Artifact Registry
 
 on:
   push:
@@ -14,38 +14,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repo
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Google Cloud SDK
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      # Step 2: Authenticate to GCP using service account
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Step 3: Authenticate service account and check connectivity
+      # Step 3: Test connectivity
       - name: Test GCP connection
         run: |
-          echo "Writing service account key to file..."
-          cat <<EOF > gcp-key.json
-${{ secrets.GCP_SA_KEY }}
-EOF
-
-          echo "Activating service account..."
-          gcloud auth activate-service-account --key-file=gcp-key.json
-
           echo "Listing projects to test GCP connectivity..."
           gcloud projects list
 
           echo "Listing Artifact Registry repositories..."
           gcloud artifacts repositories list --location=${GCP_REGION}
 
-          # Remove the temporary key file
-          rm gcp-key.json
-
-      # Step 4: Configure Docker to authenticate with Artifact Registry
+      # Step 4: Configure Docker for Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
 
