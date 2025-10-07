@@ -32,7 +32,7 @@ jobs:
       # Step 4: Build and push frontend Docker image
       - name: Build and push frontend Docker image
         run: |
-          docker build -t asia-south1-docker.pkg.dev/lunar-nuance-472604-c6/frontend-repo/frontend:latest ./frontend
+          docker build -t asia-south1-docker.pkg.dev/lunar-nuance-472604-c6/frontend-repo/frontend:latest .
           
           docker push asia-south1-docker.pkg.dev/lunar-nuance-472604-c6/frontend-repo/frontend:latest
 
