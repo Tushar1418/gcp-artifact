@@ -39,5 +39,5 @@ jobs:
       # Step 5: Build and push backend Docker image
       - name: Build and push backend Docker image
         run: |
-          docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo ./backend
+          docker build -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo
           docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/backend-repo
